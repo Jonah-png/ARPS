@@ -52,26 +52,28 @@
       <div style="flex: 75%" class="first-col">
         <h2>Preview:</h2>
         <div class="center">
-          <img id="displayed-img" src="" />
+          <img id="displayed-img" />
         </div>
         <h2>Options:</h2>
         <form class="sliders">
-          <div>Scale (%)</div>
+          <div>Scale (x)</div>
           <div class="slider-container">
             <input
               type="range"
               min="0"
-              max="200"
-              value="100"
-              class="slider"
+              max="3"
+              step="0.1"
+              value="1"
+              name="scale"
               id="scale"
               onchange="matchSliderAndNum('scale', 'scale-num')"
             />
             <input
               type="number"
               min="0"
-              max="200"
-              value="100"
+              max="3"
+              step="0.1"
+              value="1"
               id="scale-num"
               onkeyup="validateInput(this)"
               onchange="matchSliderAndNum('scale-num', 'scale')"
@@ -79,33 +81,69 @@
             <input
               type="button"
               value="Reset"
-              onclick="updateImage('scale', 100)"
+              onclick="updateImage('scale', 'reset')"
             />
           </div>
-          <div>Rotation (°)</div>
+          <div>Rotation (x° y° z°)</div>
           <div class="slider-container">
             <input
               type="range"
               min="-180"
               max="180"
               value="0"
-              class="slider"
-              id="rotation"
-              onchange="matchSliderAndNum('rotation', 'rotation-num')"
+              name="x-rotation"
+              id="x-rotation"
+              onchange="matchSliderAndNum('x-rotation', 'x-rotation-num')"
             />
             <input
               type="number"
               min="-180"
               max="180"
               value="0"
-              id="rotation-num"
+              id="x-rotation-num"
               onkeyup="validateInput(this)"
-              onchange="matchSliderAndNum('rotation-num', 'rotation')"
+              onchange="matchSliderAndNum('x-rotation-num', 'x-rotation')"
+            />
+            <input
+              type="range"
+              min="-180"
+              max="180"
+              value="0"
+              name="y-rotation"
+              id="y-rotation"
+              onchange="matchSliderAndNum('y-rotation', 'y-rotation-num')"
+            />
+            <input
+              type="number"
+              min="-180"
+              max="180"
+              value="0"
+              id="y-rotation-num"
+              onkeyup="validateInput(this)"
+              onchange="matchSliderAndNum('y-rotation-num', 'y-rotation')"
+            />
+            <input
+              type="range"
+              min="-180"
+              max="180"
+              value="0"
+              name="z-rotation"
+              id="z-rotation"
+              onchange="matchSliderAndNum('z-rotation', 'z-rotation-num')"
+            />
+            <input
+              type="number"
+              min="-180"
+              max="180"
+              value="0"
+              id="z-rotation-num"
+              onkeyup="validateInput(this)"
+              onchange="matchSliderAndNum('z-rotation-num', 'z-rotation')"
             />
             <input
               type="button"
               value="Reset"
-              onclick="updateImage('rotation', 0)"
+              onclick="updateImage('rotation', 'reset')"
             />
           </div>
         </form>
@@ -165,18 +203,28 @@
       // updates the displayedImg to reflect the changes made to scale and rotation
       function updateImage(id, val) {
         const scale = document.getElementById("scale");
-        const rotation = document.getElementById("rotation");
+        const rotX = document.getElementById("x-rotation");
+        const rotY = document.getElementById("y-rotation");
+        const rotZ = document.getElementById("z-rotation");
         const displayedImg = document.getElementById("displayed-img");
 
-        if (id == "scale" || id == "scale-num") {
-          scale.value = val;
-          document.getElementById("scale-num").value = val;
-          displayedImg.style.transform = `scale(${val}%) rotate(${rotation.value}deg)`;
-        } else {
-          rotation.value = val;
-          document.getElementById("rotation-num").value = val;
-          displayedImg.style.transform = `scale(${scale.value}%) rotate(${val}deg)`;
+        if (val == "reset") {
+          if (id[0] == "s") {
+            scale.value = 1;
+            document.getElementById("scale-num").value = 0;
+          } else {
+            rotX.value = rotY.value = rotZ.value = 0;
+            document.getElementById("x-rotation-num").value = 0;
+            document.getElementById("y-rotation-num").value = 0;
+            document.getElementById("z-rotation-num").value = 0;
+          }
         }
+
+        // transforms the image
+        displayedImg.style.transform = `scale(${scale.value}) 
+                                        rotateX(${rotX.value}deg) 
+                                        rotateY(${rotY.value}deg) 
+                                        rotateZ(${rotZ.value}deg)`;
       }
 
       // makes sure the number that was manually input is within the valid range
