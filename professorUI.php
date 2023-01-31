@@ -1,3 +1,10 @@
+<?php session_start(); /* Starts the session */
+
+if(!isset($_SESSION['UserData']['Username'])){
+  header("location:login.php");
+  exit;
+}
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -5,7 +12,6 @@
       body {
         font-family: Arial, sans-serif;
       }
-
       .center {
         display: flex;
         justify-content: center;
@@ -15,32 +21,34 @@
         border-radius: 20px;
         margin: 20px;
       }
-
       .center img {
         max-width: 30%;
         max-height: 30%;
       }
-
-      .first-col h2,
-      .sliders {
-        padding-left: 20px;
+      .first-col h2, .slider-container {
+        padding: 0 20px;
       }
-
+      input[type="number"] {
+        width: 50px;
+      }
       .upload-btn {
         position: fixed;
         bottom: 20px;
       }
-
+      .logout-btn, .send-btn {
+        position: relative;
+        float: right;
+        margin-top: 20px;
+        margin-right: 20px;
+      }
       .list-container {
         height: 80vh;
         overflow-y: auto;
       }
-
       ul {
         padding: 0 20px 0 0;
         list-style: none;
       }
-
       .img_list {
         max-width: 100%;
         padding: 5px 0 10px 0;
@@ -50,105 +58,108 @@
   <body>
     <div style="display: flex">
       <div style="flex: 75%" class="first-col">
+        <a href="logout.php"><button class="logout-btn">Logout</button></a>
         <h2>Preview:</h2>
         <div class="center">
           <img id="displayed-img" />
         </div>
         <!-- this iframe prevents page from redirecting to a different page onsubmit-->
         <iframe name="frame" style="display: none"></iframe>
-        <h2>Options:</h2>
         <form class="sliders" method="post" action="WriteToFile.php" target="frame">
-          <div>Scale (x)</div>
+          <input class="send-btn" style="margin-top: 0px" type="submit" value="Send Values" onclick="sentMessage()"/>
+          <h2>Options:</h2>
           <div class="slider-container">
-            <input
-              type="range"
-              min="0"
-              max="3"
-              step="0.1"
-              value="1"
-              name="scale"
-              id="scale"
-              onchange="matchSliderAndNum('scale', 'scale-num')"
-            />
-            <input
-              type="number"
-              min="0"
-              max="3"
-              step="0.1"
-              value="1"
-              id="scale-num"
-              onkeyup="validateInput(this)"
-              onchange="matchSliderAndNum('scale-num', 'scale')"
-            />
-            <input
-              type="button"
-              value="Reset"
-              onclick="updateImage('scale', 'reset')"
-            />
+            <div>Scale (x)</div>
+            <div>
+              <input
+                type="range"
+                min="0"
+                max="3"
+                step="0.1"
+                value="1"
+                name="scale"
+                id="scale"
+                onchange="matchSliderAndNum('scale', 'scale-num')"
+              />
+              <input
+                type="number"
+                min="0"
+                max="3"
+                step="0.1"
+                value="1"
+                id="scale-num"
+                onkeyup="validateInput(this)"
+                onchange="matchSliderAndNum('scale-num', 'scale')"
+              />
+              <input
+                type="button"
+                value="Reset"
+                onclick="updateImage('scale', 'reset')"
+              />
+            </div>
+            <div>Rotation (x° y° z°)</div>
+            <div>
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                value="0"
+                name="x-rotation"
+                id="x-rotation"
+                onchange="matchSliderAndNum('x-rotation', 'x-rotation-num')"
+              />
+              <input
+                type="number"
+                min="-180"
+                max="180"
+                value="0"
+                id="x-rotation-num"
+                onkeyup="validateInput(this)"
+                onchange="matchSliderAndNum('x-rotation-num', 'x-rotation')"
+              />
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                value="0"
+                name="y-rotation"
+                id="y-rotation"
+                onchange="matchSliderAndNum('y-rotation', 'y-rotation-num')"
+              />
+              <input
+                type="number"
+                min="-180"
+                max="180"
+                value="0"
+                id="y-rotation-num"
+                onkeyup="validateInput(this)"
+                onchange="matchSliderAndNum('y-rotation-num', 'y-rotation')"
+              />
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                value="0"
+                name="z-rotation"
+                id="z-rotation"
+                onchange="matchSliderAndNum('z-rotation', 'z-rotation-num')"
+              />
+              <input
+                type="number"
+                min="-180"
+                max="180"
+                value="0"
+                id="z-rotation-num"
+                onkeyup="validateInput(this)"
+                onchange="matchSliderAndNum('z-rotation-num', 'z-rotation')"
+              />
+              <input
+                type="button"
+                value="Reset"
+                onclick="updateImage('rotation', 'reset')"
+              />
+            </div>
           </div>
-          <div>Rotation (x° y° z°)</div>
-          <div class="slider-container">
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              value="0"
-              name="x-rotation"
-              id="x-rotation"
-              onchange="matchSliderAndNum('x-rotation', 'x-rotation-num')"
-            />
-            <input
-              type="number"
-              min="-180"
-              max="180"
-              value="0"
-              id="x-rotation-num"
-              onkeyup="validateInput(this)"
-              onchange="matchSliderAndNum('x-rotation-num', 'x-rotation')"
-            />
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              value="0"
-              name="y-rotation"
-              id="y-rotation"
-              onchange="matchSliderAndNum('y-rotation', 'y-rotation-num')"
-            />
-            <input
-              type="number"
-              min="-180"
-              max="180"
-              value="0"
-              id="y-rotation-num"
-              onkeyup="validateInput(this)"
-              onchange="matchSliderAndNum('y-rotation-num', 'y-rotation')"
-            />
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              value="0"
-              name="z-rotation"
-              id="z-rotation"
-              onchange="matchSliderAndNum('z-rotation', 'z-rotation-num')"
-            />
-            <input
-              type="number"
-              min="-180"
-              max="180"
-              value="0"
-              id="z-rotation-num"
-              onkeyup="validateInput(this)"
-              onchange="matchSliderAndNum('z-rotation-num', 'z-rotation')"
-            />
-            <input
-              type="button"
-              value="Reset"
-              onclick="updateImage('rotation', 'reset')"
-            />
-          </div>
-          <input type="submit" value="Send Values" />
         </form>
       </div>
       <div style="flex: 25%">
@@ -230,6 +241,9 @@
                                         rotateZ(${rotZ.value}deg)`;
       }
 
+      function sentMessage() {
+        alert("Values were sent");
+      }
       // makes sure the number that was manually input is within the valid range
       // if it's not, the number will change to the min or max depending on the case
       function validateInput(num) {
