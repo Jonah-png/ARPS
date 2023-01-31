@@ -54,8 +54,10 @@
         <div class="center">
           <img id="displayed-img" />
         </div>
+        <!-- this iframe prevents page from redirecting to a different page onsubmit-->
+        <iframe name="frame" style="display: none"></iframe>
         <h2>Options:</h2>
-        <form class="sliders">
+        <form class="sliders" method="post" action="WriteToFile.php" target="frame">
           <div>Scale (x)</div>
           <div class="slider-container">
             <input
@@ -146,6 +148,7 @@
               onclick="updateImage('rotation', 'reset')"
             />
           </div>
+          <input type="submit" value="Send Values" />
         </form>
       </div>
       <div style="flex: 25%">
