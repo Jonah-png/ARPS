@@ -1,56 +1,76 @@
-<!doctype HTML>
+<!DOCTYPE html>
 <html>
-<head>
-  <!--<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <head>
+    <!--<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">-->
-</head>
-<!--Passes in a-frame components and interaction between a-frame and arjs-->
-<script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
-<script src="https://raw.githack.com/jeromeetienne/AR.js/2.1.4/aframe/build/aframe-ar.js"></script>
-<!-- Credit: https://stackoverflow.com/questions/58113667/animating-a-series-of-png-images-in-a-frame-ar-js -->
-<script>
-      AFRAME.registerComponent("textureswap", {
-        init: function() {
-          // Load the .pngs
-          let loader = new THREE.TextureLoader()
-          this.pngArray = []
-          this.pngArray.push(loader.load("/./img/logicGates.png"))
-          this.pngArray.push(loader.load("/./img/logicGates2.png"))
+  </head>
+  <!--Passes in a-frame components and interaction between a-frame and arjs-->
+  <script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/jeromeetienne/AR.js/2.1.4/aframe/build/aframe-ar.js"></script>
+  <!-- Credit: https://stackoverflow.com/questions/58113667/animating-a-series-of-png-images-in-a-frame-ar-js -->
+  <script>
+    // AFRAME.registerComponent("textureswap", {
+    //   init: function() {
+    //     // Load the .pngs
+    //     let loader = new THREE.TextureLoader()
+    //     this.pngArray = []
+    //     this.pngArray.push(loader.load("logicGates.png"))
+    //     this.pngArray.push(loader.load("/./img/logicGates2.png"))
 
-          this.el.addEventListener('loaded', e => {
-            let mesh = this.el.getObject3D("mesh")
-            this.material = mesh.material
+    //     this.el.addEventListener('loaded', e => {
+    //       let mesh = this.el.getObject3D("mesh")
+    //       this.material = mesh.material
 
-            var i = 0
-            this.id = setInterval(e => {
-              if (i >= this.pngArray.length) i = 0;
-              this.material.map = this.pngArray[i++]
-              this.material.needsUpdate = true
-            }, 500)
-          })
-        },
-        remove: function() {
-          clearInterval(this.id);
-          // Free the memory
-          for (let i = 0; i < this.pngArray.length; i++) {
-            this.pngArray[i].dispose();
-          }
-        }
-      })
-
-    </script>
-  <body style='margin : 0px; overflow: hidden;'>
-  <!--  sets up scene for embedded to ignore external css, for arjs to turn vr to ar, and for debug to allow component flushing -->
+    //       var i = 0
+    //       this.id = setInterval(e => {
+    //         if (i >= this.pngArray.length) i = 0;
+    //         this.material.map = this.pngArray[i++]
+    //         this.material.needsUpdate = true
+    //       }, 500)
+    //     })
+    //   },
+    //   remove: function() {
+    //     clearInterval(this.id);
+    //     // Free the memory
+    //     for (let i = 0; i < this.pngArray.length; i++) {
+    //       this.pngArray[i].dispose();
+    //     }
+    //   }
+    // })
+  </script>
+  <body style="margin: 0px; overflow: hidden">
+    <!--  sets up scene for embedded to ignore external css, for arjs to turn vr to ar, and for debug to allow component flushing -->
     <a-scene embedded arjs>
       <!-- sets marker in scene to the square hiro marker discussed in the readme -->
+      <!--
       <a-marker preset="hiro" id = "main">
-          <a-box position="0 0 0" textureswap></a-box>
+          <a-box position="0 0.5 0" material="color: red;">
+            <a-animation attribute="rotation" to="360 360 360" dur="10000" easing="linear" repeat="indefinite"></a-animation>
+          </a-box>
       </a-marker>
+      -->
+
+      <!--This is a decent setup for marker on a piece of paper-->
+
+      <!-- <a-marker preset="hiro" id = "main">
+        <a-plane src="https://i.imgur.com/buVqwwJ.png" height="4" width="4" position="2 0 -5.5" rotation="-90 -5 5"></a-plane>
+      </a-marker> -->
+
+      <!--This is an inital setup for presentation mode-->
+
+      <a-marker preset="hiro" id="main">
+        <a-plane
+          src="displayed_img.png"
+          height="2.5"
+          width="2.5"
+          position="3.9 0 .5"
+          rotation="-90 -5 5"
+        ></a-plane>
+      </a-marker>
+
       <!--This last component makes the user device's camera view the background of the scene-->
-      <a-entity camera></a-entity>
+      <a-entity camera look-controls> </a-entity>
     </a-scene>
-
-
   </body>
 </html>
