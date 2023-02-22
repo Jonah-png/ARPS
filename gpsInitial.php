@@ -10,25 +10,30 @@
 
     <body style="margin: 0; overflow: hidden;">
         <div id="ar-container" style="width: 100%; height: 100%; margin: 0 auto;">
+        <div id="ar-container" style="width: 100%; height: 100%; margin: 0 auto;">
         <a-scene
             vr-mode-ui="enabled: false"
             embedded
             loading-screen="enabled: false;"
-            arjs="sourceType: webcam; debugUIEnabled: false;"
-        >
-                <a-image
-                    src="displayed_img.png"
-                    look-at="[gps-camera]"
-                    scale="1 1 1"
-                    gps-entity-place="latitude: 42.2906875; longitude: -85.6182001;"
-                    id="ar-image"
-                ></a-image>
-
-            <a-camera gps-camera look-controls`></a-camera>
+            renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true"
+            embedded
+            arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
+            
+            <a-image
+                src="displayed_img.png"
+                look-at="[gps-camera]"
+                scale=".25 .25 .25"
+                gps-entity-place="latitude: 42.2906875; longitude: -85.6182001;"
+                position="0 0 0"
+                id="ar-image"
+            ></a-image>
+            <a-camera id="cam" gps-camera rotation-reader gps-camera-debug></a-camera>
         </a-scene>
         </div>
+        </div>
 
-        <button id="update-location-button" onclick="updateLocation()">Update Location</button>
+        <button id="update-location-button" onclick="changePos()">Update Location</button>
+        
         <div id="image-info">
             <?php 
             // displays data from file onclick of image-info-button
@@ -76,7 +81,7 @@
             }
         </style>
         <script>
-            function updateLocation() {
+            function changePos() {
                 navigator.geolocation.getCurrentPosition(getLocationData);
             }
             function getLocationData(position) {
@@ -84,10 +89,38 @@
                     var lon = position.coords.longitude;
 
                     var alt = position.coords.altitude;
-                    
+
                     document.getElementById("ar-image").setAttribute("gps-entity-place", "latitude: " + lat + "; longitude: " + lon + ";");
-                    alert("New Coordinates: " + "Latitude: " + lat + " Longitude: " + lon + " Altitude: " + alt);
+                    alert("New Coordinates: " + "Latitude: " + lat + " Longitude: " + lon);
                 }
+
+
+
+            //code to simulate gps coordinates for the camera
+
+            // options = {
+            //     enableHighAccuracy: true,
+            //     timeout: 500,
+            //     maximumAge: 0
+            // };
+            // var t=setInterval(dummyFunc,100);
+
+            // function dummyFunc() {
+            //     navigator.geolocation.getCurrentPosition(success, error, options);
+            // }
+            
+            // function success(position) {
+            //     var lat = position.coords.latitude;
+            //     var lon = position.coords.longitude;
+
+            //     var alt = position.coords.altitude;
+
+            //     document.getElementById("cam").setAttribute("simulateLatitude", lat);
+            //     document.getElementById("cam").setAttribute("simulateLongitude", lon);
+            // }
+            // function error(err) {
+            //     console.error(`ERROR(${err.code}): ${err.message}`);
+            // }
         </script>
     </body>
 </html>
