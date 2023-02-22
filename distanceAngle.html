@@ -71,19 +71,27 @@
       }
 
       // Set the camera to match the user's phone camera
-      window.addEventListener('deviceorientationabsolute', function(event) {
-        const orient = new THREE.Quaternion();
-            orient.setFromEuler(new THREE.Euler(
-            THREE.Math.degToRad(event.beta),
-            THREE.Math.degToRad(event.alpha),
-            -THREE.Math.degToRad(event.gamma),
-            'YZX'
-            ));
-            camera.quaternion.copy(orient);
-      }, true);
+    function setOrientationControls(e) {
+    if (!e.alpha) {
+        return;
+    }
 
-      // Start the animation loop
-      animate();
+    const orient = new THREE.Quaternion();
+    orient.setFromEuler(new THREE.Euler(
+        THREE.Math.degToRad(e.beta),
+        THREE.Math.degToRad(e.alpha),
+        -THREE.Math.degToRad(e.gamma),
+        'YZX'
+    ));
+    camera.quaternion.copy(orient);
+
+    window.removeEventListener('deviceorientation', setOrientationControls);
+    }
+
+    window.addEventListener('deviceorientation', setOrientationControls, true);
+
+    // Start the animation loop
+    animate();
     </script>
   </body>
 </html>
