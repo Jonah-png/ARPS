@@ -27,7 +27,7 @@
                 position="0 0 0"
                 id="ar-image"
             ></a-image>
-            <a-camera id="cam" gps-camera rotation-reader></a-camera>
+            <a-camera id="cam" gps-camera rotation-reader gps-camera-debug></a-camera>
         </a-scene>
         </div>
         </div>
