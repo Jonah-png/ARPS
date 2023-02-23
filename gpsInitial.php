@@ -17,7 +17,7 @@
             loading-screen="enabled: false;"
             renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true"
             embedded
-            arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
+            arjs='sourceType: webcam; debugUIEnabled: false;'>
             
             <a-image
                 src="displayed_img.png"
@@ -27,7 +27,7 @@
                 position="0 0 0"
                 id="ar-image"
             ></a-image>
-            <a-camera id="cam" gps-camera rotation-reader gps-camera-debug></a-camera>
+            <a-camera id="cam" gps-camera rotation-reader></a-camera>
         </a-scene>
         </div>
         </div>
