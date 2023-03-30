@@ -14,13 +14,13 @@ if (isset($_POST['Submit'])) {
   } else {
     $msg = "<span style='color:red'>Invalid Login Details</span>";
   }
-}
 
-// // code if username and password need to be changed
-// $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-// $file = fopen("passwords.txt", "a");
-// fwrite($file, $username . ":" . $hashedPassword . "\n");
-// fclose($file);
+  // // code if username and password need to be changed
+  // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+  // $file = fopen("secure/login.txt", "a");
+  // fwrite($file, $username . "\n" . $hashedPassword);
+  // fclose($file);
+}
 ?>
 <div style="
         font-family: Arial, sans-serif;
