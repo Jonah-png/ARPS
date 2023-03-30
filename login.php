@@ -6,7 +6,7 @@ if (isset($_POST['Submit'])) {
   // reads the hashed password from the file
   $file = file_get_contents("secure/login.txt");
   $lines = explode("\n", $file);
-  if ($lines[0] === $username and password_verify($password, $lines[1])) {
+  if (trim($lines[0]) === $username and password_verify($password, $lines[1])) {
     // sets session variables and redirects to UI
     $_SESSION['UserData']['Username'] = $lines[1];
     header("location:professorUI.php");
