@@ -1,261 +1,246 @@
 <?php session_start(); /* Starts the session */
 
-if(!isset($_SESSION['UserData']['Username'])){
+if (!isset($_SESSION['UserData']['Username'])) {
   header("location:login.php");
   exit;
+}
+if (isset($_POST['delete'])) {
+  $files = glob("images/*");
+  foreach ($files as $file) {
+    if (is_file($file)) {
+      unlink($file);
+    }
+  }
+  $audFiles = glob("images/audience/*");
+  if (count($audFiles) == 1) {
+    unlink($audFiles[0]);
+  }
+  $deskFiles = glob("images/desk/*");
+  if (count($deskFiles) == 1) {
+    unlink($deskFiles[0]);
+  }
+}
+if (isset($_POST['aud'])) {
+  $filename = $_POST['dataAud'];
+  $files = glob("images/audience/*");
+  if (file_exists("images/audience/" . $filename)) {
+    unlink("images/audience/" . $filename);
+  } else {
+    if (count($files) == 1) {
+      unlink($files[0]);
+    }
+    copy("images/" . $filename, "images/audience/" . $filename);
+  }
+  if (file_exists("images/desk/" . $filename)) {
+    unlink("images/desk/" . $filename);
+  }
+}
+if (isset($_POST['desk'])) {
+  $filename = $_POST['dataDesk'];
+  $files = glob("images/desk/*");
+  if (file_exists("images/desk/" . $filename)) {
+    unlink("images/desk/" . $filename);
+  } else {
+    if (count($files) == 1) {
+      unlink($files[0]);
+    }
+    copy("images/" . $filename, "images/desk/" . $filename);
+  }
+  if (file_exists("images/audience/" . $filename)) {
+    unlink("images/audience/" . $filename);
+  }
 }
 ?>
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-      }
-      .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 65vh;
-        border: 3px solid;
-        border-radius: 20px;
-        margin: 20px;
-      }
-      .center img {
-        max-width: 30%;
-        max-height: 30%;
-      }
-      .first-col h2, .slider-container {
-        padding: 0 20px;
-      }
-      input[type="number"] {
-        width: 50px;
-      }
-      .upload-btn {
-        position: fixed;
-        bottom: 20px;
-      }
-      .logout-btn, .send-btn {
-        position: relative;
-        float: right;
-        margin-top: 20px;
-        margin-right: 20px;
-      }
-      .list-container {
-        height: 80vh;
-        overflow-y: auto;
-      }
-      ul {
-        padding: 0 20px 0 0;
-        list-style: none;
-      }
-      .img_list {
-        max-width: 100%;
-        padding: 5px 0 10px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div style="display: flex">
-      <div style="flex: 75%" class="first-col">
-        <a href="logout.php"><button class="logout-btn">Logout</button></a>
-        <h2>Preview:</h2>
-        <div class="center">
-          <img id="displayed-img" />
-        </div>
-        <!-- this iframe prevents page from redirecting to a different page onsubmit-->
-        <iframe name="frame" style="display: none"></iframe>
-        <form class="sliders" method="post" action="WriteToFile.php" target="frame">
-          <input class="send-btn" style="margin-top: 0px" type="submit" value="Send Values" onclick="sentMessage()"/>
-          <h2>Options:</h2>
-          <div class="slider-container">
-            <div>Scale (x)</div>
-            <div>
-              <input
-                type="range"
-                min="0"
-                max="3"
-                step="0.1"
-                value="1"
-                name="scale"
-                id="scale"
-                onchange="matchSliderAndNum('scale', 'scale-num')"
-              />
-              <input
-                type="number"
-                min="0"
-                max="3"
-                step="0.1"
-                value="1"
-                id="scale-num"
-                onkeyup="validateInput(this)"
-                onchange="matchSliderAndNum('scale-num', 'scale')"
-              />
-              <input
-                type="button"
-                value="Reset"
-                onclick="updateImage('scale', 'reset')"
-              />
-            </div>
-            <div>Rotation (x° y° z°)</div>
-            <div>
-              <input
-                type="range"
-                min="-180"
-                max="180"
-                value="0"
-                name="x-rotation"
-                id="x-rotation"
-                onchange="matchSliderAndNum('x-rotation', 'x-rotation-num')"
-              />
-              <input
-                type="number"
-                min="-180"
-                max="180"
-                value="0"
-                id="x-rotation-num"
-                onkeyup="validateInput(this)"
-                onchange="matchSliderAndNum('x-rotation-num', 'x-rotation')"
-              />
-              <input
-                type="range"
-                min="-180"
-                max="180"
-                value="0"
-                name="y-rotation"
-                id="y-rotation"
-                onchange="matchSliderAndNum('y-rotation', 'y-rotation-num')"
-              />
-              <input
-                type="number"
-                min="-180"
-                max="180"
-                value="0"
-                id="y-rotation-num"
-                onkeyup="validateInput(this)"
-                onchange="matchSliderAndNum('y-rotation-num', 'y-rotation')"
-              />
-              <input
-                type="range"
-                min="-180"
-                max="180"
-                value="0"
-                name="z-rotation"
-                id="z-rotation"
-                onchange="matchSliderAndNum('z-rotation', 'z-rotation-num')"
-              />
-              <input
-                type="number"
-                min="-180"
-                max="180"
-                value="0"
-                id="z-rotation-num"
-                onkeyup="validateInput(this)"
-                onchange="matchSliderAndNum('z-rotation-num', 'z-rotation')"
-              />
-              <input
-                type="button"
-                value="Reset"
-                onclick="updateImage('rotation', 'reset')"
-              />
-            </div>
-          </div>
-        </form>
-      </div>
-      <div style="flex: 25%">
-        <h2>Uploaded Images:</h2>
-        <div class="list-container">
-          <ul id="recent"></ul>
-        </div>
-        <form class="upload-btn">
-          <input type="file" id="file-input" onchange="replaceImage()" />
-        </form>
-      </div>
-    </div>
-    <script>
-      // when a file is chosen, it gets displayed as displayedImg, replacing the old one
-      // and is added to the "Uploaded Files" section
-      function replaceImage() {
-        const input = document.getElementById("file-input");
 
-        // otherwise will throw an error if user clicks cancel instead of choosing file
-        if (input.files.length > 0) {
-          const displayedImg = document.getElementById("displayed-img");
-          displayedImg.src = URL.createObjectURL(input.files[0]);
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
 
-          // creates the "Uploaded Files" section
-          const list = document.getElementById("recent");
-          const listItem = document.createElement("li");
+    h2 {
+      margin-left: 10px;
+    }
 
-          const img = document.createElement("img");
-          img.src = URL.createObjectURL(input.files[0]);
-          img.className = "img_list";
-          img.title = "Choose Image";
+    #img_list {
+      display: flex;
+      flex-wrap: wrap;
+      list-style: none;
+    }
 
-          listItem.appendChild(document.createTextNode(input.files[0].name));
-          listItem.appendChild(img);
-          list.insertBefore(listItem, list.children[0]);
+    #img_list li {
+      border-radius: 5px;
+      margin: 10px;
+      max-width: 320px;
+    }
 
-          // when an uploaded image is clicked, it becomes the displayedImg
-          // currently doesn't change the name of the file next to the "Choose File" button
-          listItem.onclick = function () {
-            displayedImg.src = img.src;
-          };
-        }
-      }
+    #img_list div {
+      padding: 10px 10px 0 10px;
+      display: flex;
+    }
 
-      // matches the slider to the text value
-      // the parameters will either be a slider value or input-number value
-      function matchSliderAndNum(val1, val2) {
-        const input = document.getElementById(val1);
-        document.getElementById(val2).value = input.value;
+    #img_list span {
+      margin-right: auto;
+      display: inline-block;
+      width: calc(100% - 60px);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
 
-        // call updateImage to make sure the image reflects the changes
-        updateImage(val1, input.value);
-      }
+    #img_list input[name="desk"] {
+      margin-left: 5px;
+    }
 
-      // updates the displayedImg to reflect the changes made to scale and rotation
-      function updateImage(id, val) {
-        const scale = document.getElementById("scale");
-        const rotX = document.getElementById("x-rotation");
-        const rotY = document.getElementById("y-rotation");
-        const rotZ = document.getElementById("z-rotation");
-        const displayedImg = document.getElementById("displayed-img");
+    #img_list .img {
+      width: 300px;
+      padding: 10px;
+    }
 
-        if (val == "reset") {
-          if (id[0] == "s") {
-            scale.value = 1;
-            document.getElementById("scale-num").value = 0;
+    .not-selected {
+      background-color: #f2f2f2;
+    }
+
+    .selected-aud {
+      background-color: #e5e5ff;
+    }
+
+    .selected-desk {
+      background-color: #ffe5e5;
+    }
+
+    .nav {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f2f2f2;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav li>* {
+      display: block;
+      padding: 8px 5px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Uploaded Images:</h2>
+  <ul id="img_list"></ul>
+  <ul class="nav">
+    <li><a href="logout.php"><button>Logout</button></a></li>
+    <li><a href="studentUI.php" title="Go to Student UI"><button>Student UI</button></a></li>
+    <li style="margin-right: auto;">
+      <form method="post"><input type="submit" name="delete" value="Delete Images" title="Delete images from server" /></form>
+    </li>
+    <li>
+      <!-- this iframe prevents page from redirecting to a different page onsubmit-->
+      <iframe name="frame" style="display: none"></iframe>
+      <form id="upload-btn" action="upload.php" method="POST" enctype="multipart/form-data" target="frame">
+        <input type="file" id="file-input" name="image" onchange="addImage()" />
+      </form>
+    </li>
+  </ul>
+  <script>
+    // when a file is chosen, it gets added to the uploaded images section
+    function addImage() {
+      const input = document.getElementById("file-input");
+
+      // otherwise will throw an error if user clicks cancel instead of choosing file
+      if (input.files.length > 0) {
+        document.getElementById("upload-btn").submit();
+
+        // creates the "Uploaded Files" section
+        const list = document.getElementById("img_list");
+        const li = document.createElement("li");
+        li.className = "not-selected";
+        const header = document.createElement("div");
+        const span = document.createElement("span");
+        const text = document.createTextNode(input.files[0].name);
+        const formAud = document.createElement("form");
+        formAud.method = "post";
+        formAud.target = "frame";
+        formAud.className = "form";
+        const dataAud = document.createElement("input");
+        dataAud.type = "hidden";
+        dataAud.name = "dataAud";
+        dataAud.value = input.files[0].name;
+        const inputAud = document.createElement("input");
+        inputAud.type = "submit";
+        inputAud.name = "aud";
+        inputAud.value = "Audience";
+        inputAud.title = "Click to display";
+
+        const formDesk = document.createElement("form");
+        formDesk.method = "post";
+        formDesk.target = "frame";
+        formDesk.className = "form";
+        const dataDesk = document.createElement("input");
+        dataDesk.type = "hidden";
+        dataDesk.name = "dataDesk";
+        dataDesk.value = input.files[0].name;
+        const inputDesk = document.createElement("input");
+        inputDesk.type = "submit";
+        inputDesk.name = "desk";
+        inputDesk.value = "Desk";
+        inputDesk.title = "Click to display";
+
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(input.files[0]);
+        img.className = "img";
+
+        list.insertBefore(li, list.children[0]);
+        li.appendChild(header);
+        header.append(span);
+        span.appendChild(text);
+        header.appendChild(formAud);
+        formAud.appendChild(inputAud);
+        formAud.appendChild(dataAud);
+        header.appendChild(formDesk);
+        formDesk.appendChild(inputDesk);
+        formDesk.appendChild(dataDesk);
+        li.appendChild(img);
+
+        // highlights the selected image when clicked
+        inputAud.onclick = function() {
+          if (li.className == "selected-aud") {
+            li.className = "not-selected";
           } else {
-            rotX.value = rotY.value = rotZ.value = 0;
-            document.getElementById("x-rotation-num").value = 0;
-            document.getElementById("y-rotation-num").value = 0;
-            document.getElementById("z-rotation-num").value = 0;
+            const lis = document.querySelectorAll("#img_list li");
+            lis.forEach(item => {
+              if (item.className == "selected-aud") {
+                item.className = "not-selected";
+              }
+            });
+            li.className = "selected-aud";
           }
-        }
+        };
+        inputDesk.onclick = function() {
+          if (li.className == "selected-desk") {
+            li.className = "not-selected";
+          } else {
+            const lis = document.querySelectorAll("#img_list li");
+            lis.forEach(item => {
+              if (item.className == "selected-desk") {
+                item.className = "not-selected";
+              }
+            });
+            li.className = "selected-desk";
+          }
+        };
+      }
+    }
+  </script>
+</body>
 
-        // transforms the image
-        displayedImg.style.transform = `scale(${scale.value}) 
-                                        rotateX(${rotX.value}deg) 
-                                        rotateY(${rotY.value}deg) 
-                                        rotateZ(${rotZ.value}deg)`;
-      }
-
-      function sentMessage() {
-        alert("Values were sent");
-      }
-      // makes sure the number that was manually input is within the valid range
-      // if it's not, the number will change to the min or max depending on the case
-      function validateInput(num) {
-        if (num.value != "") {
-          if (parseInt(num.value) < parseInt(num.min)) {
-            num.value = num.min;
-          }
-          if (parseInt(num.value) > parseInt(num.max)) {
-            num.value = num.max;
-          }
-        }
-      }
-    </script>
-  </body>
 </html>
