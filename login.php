@@ -22,24 +22,52 @@ if (isset($_POST['Submit'])) {
   // fclose($file);
 }
 ?>
-<div style="
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 3px solid;
-        border-radius: 20px;
-        height: 200px;
-        width: 320px;
-        margin: 200px auto;
-        ">
-  <form method="post" style="text-align: center;">
-    <h2>Login</h2>
-    <?php if (isset($msg)) { ?>
-      <div><?php echo $msg; ?></div>
-    <?php } ?>
-    <input style="display: block; margin: 5px" type="text" name="username" autocomplete="username" placeholder="username" />
-    <input style="display: block; margin: 5px" type="password" name="password" autocomplete="current-password" placeholder="password" />
-    <input name="Submit" type="submit" value="Login">
-  </form>
-</div>
+
+<!--Reference: https://www.youtube.com/watch?v=p1GmFCGuVjw&t=4s&ab_channel=Codehal-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <div class="logo">
+        <a href="navbar.html"><img id="logo" src="assets/logo.png" alt="Logo"></a>
+      </div>
+    </header>
+  </div>
+  <div class="login-page">
+    <div class="login-box">
+      <h2>Login</h2>
+      <form method="post" style="text-align: center;">
+
+        <?php if (isset($msg)) { ?>
+          <div><?php echo $msg; ?></div>
+        <?php } ?>
+        <div class="login-req">
+          <span class="icon"><ion-icon name="mail"></ion-icon></span>
+          <input type="text" name="username" />
+          <label>Username</label>
+        </div>
+        <div class="login-req">
+          <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+          <input type="password" name="password" />
+          <label>Password</label>
+        </div>
+        <button name="Submit" type="submit" class="login-btn" value="Login">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

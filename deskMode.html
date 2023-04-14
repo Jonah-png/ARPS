@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
+  <style>
+    button {
+      position: absolute;
+      z-index: 1;
+      left: 10px;
+    }
+  </style>
+</head>
+
+<body style="margin: 0; overflow: hidden;">
+  <a-scene vr-mode-ui="enabled: false;" loading-screen="enabled: false;" arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;" id="scene" embedded gesture-detector>
+    <a-marker id="animated-marker" type="pattern" preset="custom" url="assets/marker.patt" raycaster="objects: .clickable" emitevents="true" cursor="fuse: false; rayOrigin: mouse;" id="markerA">
+      <a-image src="images/desk/image.png" scale="1 1 1" class="clickable" rotation="-90 0 0" gesture-handler></a-image>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+  <button style="bottom: 50px" onclick="window.location.reload()">Update</button>
+  <button style="bottom: 10px"><a href="/ARPS/audienceMode.html">Swap to Audience Mode</a></button>
+</body>
+
+</html>
