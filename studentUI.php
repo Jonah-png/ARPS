@@ -20,9 +20,9 @@
 
 <body style="margin: 0px; overflow: hidden">
   <!-- this a-scene works with obs virtual camera -->
-  <!-- <a-scene embedded arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'> -->
+  <a-scene embedded vr-mode-ui="enabled: false" arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'>
   <!-- this a-scene works with actual camera -->
-  <a-scene vr-mode-ui="enabled: false" embedded loading-screen="enabled: false;" renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true" embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
+  <!-- <a-scene vr-mode-ui="enabled: false" embedded loading-screen="enabled: false;" renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true" embedded arjs='sourceType: webcam; debugUIEnabled: false;'> -->
 
     <a-marker preset="hiro" id="main">
       <?php

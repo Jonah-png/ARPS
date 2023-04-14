@@ -12,12 +12,14 @@ if (isset($_POST['delete'])) {
     }
   }
   $audFiles = glob("images/audience/*");
-  if (count($audFiles) == 1) {
+  if (count($audFiles) == 2) {
     unlink($audFiles[0]);
+    unlink($audFiles[1]);
   }
   $deskFiles = glob("images/desk/*");
-  if (count($deskFiles) == 1) {
+  if (count($deskFiles) == 2) {
     unlink($deskFiles[0]);
+    unlink($deskFiles[1]);
   }
 }
 if (isset($_POST['aud'])) {
@@ -25,14 +27,18 @@ if (isset($_POST['aud'])) {
   $files = glob("images/audience/*");
   if (file_exists("images/audience/" . $filename)) {
     unlink("images/audience/" . $filename);
+    unlink("images/audience/image.png");
   } else {
-    if (count($files) == 1) {
+    if (count($files) == 2) {
       unlink($files[0]);
+      unlink($files[1]);
     }
     copy("images/" . $filename, "images/audience/" . $filename);
+    copy("images/" . $filename, "images/audience/image.png");
   }
   if (file_exists("images/desk/" . $filename)) {
     unlink("images/desk/" . $filename);
+    unlink("images/desk/image.png");
   }
 }
 if (isset($_POST['desk'])) {
@@ -40,14 +46,18 @@ if (isset($_POST['desk'])) {
   $files = glob("images/desk/*");
   if (file_exists("images/desk/" . $filename)) {
     unlink("images/desk/" . $filename);
+    unlink("images/desk/image.png");
   } else {
-    if (count($files) == 1) {
+    if (count($files) == 2) {
       unlink($files[0]);
+      unlink($files[1]);
     }
     copy("images/" . $filename, "images/desk/" . $filename);
+    copy("images/" . $filename, "images/desk/image.png");
   }
   if (file_exists("images/audience/" . $filename)) {
     unlink("images/audience/" . $filename);
+    unlink("images/audience/image.png");
   }
 }
 ?>
@@ -157,7 +167,7 @@ if (isset($_POST['desk'])) {
       const input = document.getElementById("file-input");
 
       // otherwise will throw an error if user clicks cancel instead of choosing file
-      if (input.files.length > 0) {
+      if (input.files.length > 0 && input.files[0].type.split("/")[0] == "image") {
         document.getElementById("upload-btn").submit();
 
         // creates the "Uploaded Files" section

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>1</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    button {
+      position: absolute;
+      z-index: 1;
+      left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <script async src="https://docs.opencv.org/master/opencv.js" type="text/javascript"></script>
+  <video id="video" autoplay playsinline style="display: block;"></video>
+  <canvas id="canvas"></canvas>
+  <button style="bottom: 50px" onclick="window.location.reload()">Update</button>
+  <button style="bottom: 10px"><a href="/ARPS/deskMode.php">Swap to Desk Mode</a></button>
+  <script>
+twoCorners = false;
+    currentScale = 1;
+    yShift = 0;
+
+    function initialize() {
+        if (typeof cv === 'undefined') {
+          setTimeout(initialize, 50);
+          return;
+        }
+      
+        cv.onRuntimeInitialized = function() {
+          startProcessing();
+        };
+    }
+
+    async function startProcessing() {
+      console.log('startProcessing...');
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+
+      try {
+        await startCamera(video);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        video.width = window.innerWidth;
+        video.height = window.innerHeight;
+
+        const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+        const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+
+
+        //accepts a link to an image, or a file, transparent background hasnt worked yet, might work when stored locally--------------------------------------------------------------------------------------------------------------------------------------------------
+        image = await loadImage('https://i.ibb.co/RBvDkwB/a.jpg');
+
+        //print to console.log to see the image dimensions
+        console.log(image.width);
+        console.log(image.height);
+        
+        setInterval(() => {
+          if (!video.paused && !video.ended) {
+            captureVideo(video, src);
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2BGRA);
+            drawARImage(src, dst, image);
+            if (twoCorners){
+              drawARImage(src, dst, image);
+            }
+            else{
+              cv.imshow(canvas, dst);
+            }
+            
+          }
+        }, 1000 / 60); // 30 FPS
+      } catch (err) {
+        console.error('Error starting camera or processing video:', err);
+      }
+    }
+      
+
+    function imgToMatTemp(image) {
+      const matTemp = new cv.Mat(image.height, image.width, cv.CV_8UC4);
+      const imgDataTemp = new ImageData(new Uint8ClampedArray(image.width * image.height * 4), image.width, image.height);
+      const ctxTemp = new OffscreenCanvas(image.width, image.height).getContext('2d');
+      ctxTemp.drawImage(image, 0, 0, image.width, image.height);
+      ctxTemp.getImageData(0, 0, image.width, image.height).data.set(imgDataTemp.data);
+      matTemp.data.set(imgDataTemp.data);
+      return matTemp;
+    }
+
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous'; // Add this line
+        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+      });
+    } 
+
+    async function startCamera(video) {
+        const constraints = {
+          video: { facingMode: 'environment' },
+        };
+      
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = stream;
+          video.play();
+      
+          return new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+              console.log('Video metadata loaded, starting camera...');
+              resolve(video);
+            };
+          });
+        } catch (err) {
+          console.error('Error starting camera:', err);
+          throw err;
+        }
+    }
+      
+
+    function captureVideo(video, mat) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        const ctx = tempCanvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
+        mat.data.set(imageData.data);
+        cv.cvtColor(mat, mat, cv.COLOR_RGBA2BGRA);
+        return imageData;
+    }
+      
+      
+
+    function drawARImage(src, dst, image) {
+      console.log('drawARImage...');
+      const lowerRed = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 200, 255]);
+      const upperRed = new cv.Mat(src.rows, src.cols, src.type(), [80, 80, 255, 255]);
+      const mask = new cv.Mat();
+
+      cv.inRange(src, lowerRed, upperRed, mask);
+      const contours = new cv.MatVector();
+      const hierarchy = new cv.Mat();
+      cv.findContours(mask, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+      corners = findCornerPoints(contours);
+      console.log('corners...', corners);
+      console.log('corners.length...', corners.length);
+      if (corners.length === 2) {
+          twoCorners = true;
+          corners = extendCornersToAspectRatio(corners, 16/9);
+          sortedCorners = sortCorners(corners);
+          console.log('sortedCorners...', sortedCorners);
+          const canvas = document.getElementById('canvas');
+          const ctx = canvas.getContext('2d');
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = dst.cols;
+          tempCanvas.height = dst.rows;
+          const tempCtx = tempCanvas.getContext('2d');
+          cv.imshow(tempCanvas, dst);
+          const imageData = tempCtx.getImageData(0, 0, dst.cols, dst.rows);
+          const dstMat = cv.matFromImageData(imageData);
+          applyARImage(dstMat, image, sortedCorners);
+          cv.imshow(canvas, dstMat);
+          dstMat.delete();
+      } else {
+          twoCorners = false;
+          cv.imshow(canvas, src);
+      }
+
+      mask.delete();
+      lowerRed.delete();
+      upperRed.delete();
+      contours.delete();
+      hierarchy.delete();
+    }
+
+    function extendCornersToAspectRatio(corners, aspectRatio) {
+        //change the second corner to be twice as far away from the first corner on the line between the two corners
+        const aspectRatio2 = image.width / image.height;
+        console.log("aspectRatio...", aspectRatio2)
+        console.log('corner[0]...', corners[0]);
+        console.log('corner[1]...', corners[1]);
+        // tempCoords = doubleDistance([corners[0].x, corners[0].y], [corners[1].x, corners[1].y]);
+
+        // corners[0][0] = tempCoords[0].x;
+        // corners[0][1] = tempCoords[0].y;
+        // corners[1][0] = tempCoords[1].x;
+        // corners[1][1] = tempCoords[1].y;
+
+        // console.log('tempCoords...', tempCoords);
+
+        const width = Math.abs(corners[1].x - corners[0].x);
+        const height = width / aspectRatio2;
+        const topLeft = { x: corners[0].x, y: corners[0].y - height };
+        const topRight = { x: corners[1].x, y: corners[1].y - height };
+        return [topLeft, corners[0], corners[1], topRight];
+    }
+
+
+
+    // Input: two coordinate pairs as arrays
+    // e.g. [x1, y1] and [x2, y2]
+    function doubleDistance(coord1, coord2) {
+      // Calculate the distance between the two points using the Pythagorean theorem
+      const distance = Math.sqrt((coord2[0] - coord1[0])**2 + (coord2[1] - coord1[1])**2);
+
+      // Calculate the slope of the line between the two points
+      const slope = (coord2[1] - coord1[1]) / (coord2[0] - coord1[0]);
+
+      // Calculate the x-coordinate of the right-most point
+      const rightMostX = Math.max(coord1[0], coord2[0]);
+
+      // Calculate the new x-coordinate of the right-most point
+      const newRightMostX = coord1[0] + 2 * distance / Math.sqrt(1 + slope**2);
+
+      // Calculate the new y-coordinate of the right-most point
+      const newRightMostY = coord1[1] + 2 * slope * (newRightMostX - coord1[0]);
+
+      // Update the right-most coordinate with the new coordinates
+      if (coord1[0] === rightMostX) {
+        coord1[0] = newRightMostX;
+        coord1[1] = newRightMostY;
+      } else {
+        coord2[0] = newRightMostX;
+        coord2[1] = newRightMostY;
+      }
+
+      // Return the updated coordinate pairs as an array
+      return [coord1, coord2];
+    }
+
+
+    function findCornerPoints(contours) {
+        console.log('findCornerPoints...');
+        const cornerPoints = [];
+        for (let i = 0; i < contours.size(); i++) {
+          const contour = contours.get(i);
+          const moments = cv.moments(contour);
+          const cx = moments.m10 / moments.m00;
+          const cy = moments.m01 / moments.m00;
+          cornerPoints.push({ x: cx, y: cy });
+        }
+      
+        return mergeNearbyPoints(cornerPoints, 50); // Adjust the threshold as needed
+      }
+      
+      function mergeNearbyPoints(points, threshold) {
+        const mergedPoints = [];
+        let sumX = 0;
+        let sumY = 0;
+        
+        points.forEach(point => {
+            let merged = false;
+      
+            for (let i = 0; i < mergedPoints.length; i++) {
+                const dx = point.x - mergedPoints[i].x;
+                const dy = point.y - mergedPoints[i].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+      
+                if (distance <= threshold) {
+                    mergedPoints[i].x = (mergedPoints[i].x * mergedPoints[i].count + point.x) / (mergedPoints[i].count + 1);
+                    mergedPoints[i].y = (mergedPoints[i].y * mergedPoints[i].count + point.y) / (mergedPoints[i].count + 1);
+                    mergedPoints[i].count++;
+                    merged = true;
+                    break;
+                }
+            }
+      
+            if (!merged) {
+                mergedPoints.push({ x: point.x, y: point.y, count: 1 });
+            }
+            sumX += point.x;
+            sumY += point.y;
+        });
+
+        const meanX = sumX / points.length;
+        const meanY = sumY / points.length;
+        let sumDeviationX = 0;
+        let sumDeviationY = 0;
+
+        points.forEach(point => {
+            sumDeviationX += Math.pow(point.x - meanX, 2);
+            sumDeviationY += Math.pow(point.y - meanY, 2);
+        });
+
+        const stdDevX = Math.sqrt(sumDeviationX / points.length);
+        const stdDevY = Math.sqrt(sumDeviationY / points.length);
+
+        const filteredPoints = mergedPoints.filter(point => {
+            return Math.abs(point.x - meanX) <= 2 * stdDevX && Math.abs(point.y - meanY) <= 2 * stdDevY;
+        });
+
+        return filteredPoints.map(point => ({ x: point.x, y: point.y }));
+    }
+
+
+    function removeEmptySlots(arr) {
+        return arr.filter(item => item !== undefined && item !== null);
+    }
+
+    // function applyARImage(dst, image, corners) {
+    //   console.log('applyARImage...');
+    //   const imgWidth = corners[1].x - corners[0].x;
+    //   const imgHeight = corners[2].y - corners[0].y;
+
+    //   if (imgWidth > 0 && imgHeight > 0) {
+    //     const dstCanvas = document.createElement('canvas');
+    //     dstCanvas.width = dst.cols;
+    //     dstCanvas.height = dst.rows;
+    //     cv.imshow(dstCanvas, dst);
+    //     const dstCtx = dstCanvas.getContext('2d'); // Change this line
+
+    //     const centerX = (corners[0].x + corners[1].x + corners[2].x + corners[3].x) / 4;
+    //     const centerY = (corners[0].y + corners[1].y + corners[2].y + corners[3].y) / 4;
+    //     const halfWidth = imgWidth / 2;
+    //     const halfHeight = imgHeight / 2;
+
+
+    //     dstCtx.drawImage(image, centerX - halfWidth, centerY - halfHeight, imgWidth, imgHeight); // Change this line
+    //     const imageData = dstCtx.getImageData(0, 0, dstCanvas.width, dstCanvas.height);
+    //     dst.data.set(imageData.data);
+    //   }
+    // }
+
+    function applyARImage(dst, image, corners) {
+      console.log('applyARImage...');
+
+      const srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [corners[0].x, corners[0].y, corners[1].x, corners[0].y, corners[3].x, corners[3].y, corners[2].x, corners[2].y]);
+      const dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, dst.cols, 0, 0, dst.rows, dst.cols, dst.rows]);
+
+      //add y shift to all of the srcTri y values
+      for (let i = 1; i < srcTri.data32F.length; i += 2) {
+        srcTri.data32F[i] -= yShift;
+      }
+
+      const M = cv.getPerspectiveTransform(dstTri, srcTri);
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = window.innerWidth;
+      tempCanvas.height = window.innerHeight;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(image, 0, 0, window.innerWidth, window.innerHeight);
+
+      const tempMat = cv.imread(tempCanvas);
+      const dsize = new cv.Size(dst.cols, dst.rows);
+      cv.warpPerspective(tempMat, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+
+      srcTri.delete();
+      dstTri.delete();
+      M.delete();
+      tempMat.delete();
+    }
+
+    function sortCorners(corners) {
+        corners.sort((a, b) => a.x - b.x);
+        const left = corners.slice(0, 2);
+        const right = corners.slice(2, 4);
+        left.sort((a, b) => a.y - b.y);
+        right.sort((a, b) => a.y - b.y);
+        return [left[0], right[0], right[1], left[1]];
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initialize();
+
+      const arImage = document.querySelector('#ar-image');
+                const cameraEl = document.querySelector('#camera');
+                const canvas = document.querySelector('canvas');
+                const hammer = new Hammer(canvas);
+                let initialScale = 1;
+                let newScale;
+        
+                let initialY = 0;
+                let deltaY = 10;
+                let newPosition;
+
+                hammer.get('swipe').set({ direction: Hammer.DIRECTION_VERTICAL });
+
+                hammer.on('swipeup', function (event) {
+                    yShift += deltaY;
+                });
+
+                hammer.on('swipedown', function (event) {
+                  yShift -= deltaY;
+                });
+
+                hammer.get('pinch').set({ enable: true });
+        
+                hammer.on('pinchstart', function (event) {
+                    initialScale = currentScale;
+                });
+        
+                hammer.on('pinchmove', function (event) {
+                    newScale = initialScale * event.scale;
+                    if(newScale < 1){
+                        newScale = 1;
+                    }
+                    else {
+                        currentScale = newScale;
+                    }
+                    
+                });
+    });
+  </script>
+</body>
+
+</html>
