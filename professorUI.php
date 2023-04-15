@@ -65,6 +65,7 @@ if (isset($_POST['desk'])) {
 <html>
 
 <head>
+  <title></title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -149,7 +150,8 @@ if (isset($_POST['desk'])) {
   <ul id="img_list"></ul>
   <ul class="nav">
     <li><a href="logout.php"><button>Logout</button></a></li>
-    <li><a href="studentUI.php" title="Go to Student UI"><button>Student UI</button></a></li>
+    <li><a href="audienceMode.html" title="Go to Audience Mode"><button>Audience Mode</button></a></li>
+    <li><a href="deskMode.html" title="Go to Desk Mode"><button>Desk Mode</button></a></li>
     <li style="margin-right: auto;">
       <form method="post"><input type="submit" name="delete" value="Delete Images" title="Delete images from server" /></form>
     </li>

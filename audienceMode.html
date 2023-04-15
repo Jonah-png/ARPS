@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>1</title>
+  <title>Audience Mode</title>
   <style>
     body {
       margin: 0;
@@ -41,7 +41,7 @@
   <video id="video" autoplay playsinline style="display: block;"></video>
   <canvas id="canvas"></canvas>
   <button style="bottom: 50px" onclick="window.location.reload()">Update</button>
-  <button style="bottom: 10px"><a href="/ARPS/deskMode.php">Swap to Desk Mode</a></button>
+  <button style="bottom: 10px"><a href="deskMode.html">Swap to Desk Mode</a></button>
   <script>
 twoCorners = false;
     currentScale = 1;
@@ -70,12 +70,13 @@ twoCorners = false;
         video.width = window.innerWidth;
         video.height = window.innerHeight;
 
+        console.log(video.videoHeight, video.videoWidth)
         const src = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
         const dst = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
 
 
         //accepts a link to an image, or a file, transparent background hasnt worked yet, might work when stored locally--------------------------------------------------------------------------------------------------------------------------------------------------
-        image = await loadImage('https://i.ibb.co/RBvDkwB/a.jpg');
+        image = await loadImage('images/audience/image.png');
 
         //print to console.log to see the image dimensions
         console.log(image.width);
