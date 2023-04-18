@@ -5,10 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ARPS</title>
+    <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <button><a href="deskMode.html">Desk Mode</a></button>
-    <button><a href="audienceMode.html">Audience Mode</a></button>
-    <button><a href="professorUI.php">Prof UI</a></button>
+    <div class="page">
+      <nav class="navbar">
+        <div class="logo">
+          <a href="index.html"><img src="assets/logo.png" alt="Logo" /></a>
+        </div>
+        <ul class="menu">
+          <li>
+            <button class="login" style="width: auto">
+              <a href="professorUI.php">Login</a>
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <section id="home">
+        <h1>Welcome to ARPS</h1>
+        <div class="btn">
+          <a href="deskMode.html">Desk Mode</a>
+          <a href="audienceMode.html">Audience Mode</a>
+        </div>
+      </section>
+    </div>
   </body>
 </html>
