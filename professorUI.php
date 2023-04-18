@@ -152,10 +152,10 @@ if (isset($_POST['desk'])) {
     <li><a href="logout.php"><button>Logout</button></a></li>
     <li><a href="audienceMode.html" title="Go to Audience Mode"><button>Audience Mode</button></a></li>
     <li><a href="deskMode.html" title="Go to Desk Mode"><button>Desk Mode</button></a></li>
-    <li style="margin-right: auto;">
+    <li>
       <form method="post"><input type="submit" name="delete" value="Delete Images" title="Delete images from server" /></form>
     </li>
-    <li>
+    <li style="margin-right: auto;">
       <!-- this iframe prevents page from redirecting to a different page onsubmit-->
       <iframe name="frame" style="display: none"></iframe>
       <form id="upload-btn" action="upload.php" method="POST" enctype="multipart/form-data" target="frame">
